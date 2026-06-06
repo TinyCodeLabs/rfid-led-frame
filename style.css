@@ -35,101 +35,70 @@ a {
   font-weight: 400;
 }
 
-h1,
-h2,
-h3 {
-  margin: 0;
-}
-
-button {
-  background-color: #1b1b29;
-  color: white;
-  border: 1px solid white;
-  padding: 10px;
+#led_grid {
+  display: grid;
+  grid-template-columns: 15% 1fr 15%;
+  grid-template-rows: 15% 1fr 15%;
+  grid-auto-columns: 1fr;
+  gap: 0px 0px;
+  grid-auto-flow: row;
+  grid-template-areas:
+    ". top ."
+    "left image right"
+    ". bottom .";
   width: 100%;
-  transition: 250ms;
-  font-family: "Source Code Pro", monospace;
-  font-size: large;
-  border-radius: 5px;
-  cursor: pointer;
+  aspect-ratio: 1;
 }
 
-button:active,
-button:hover {
-  background-color: white;
-  color: black;
+#led_grid .image {
+  grid-area: image;
   border: 1px solid white;
-  padding: 10px;
-  width: 100%;
-  transition: 250ms;
-}
-
-button.iconButton {
-  border: none;
-}
-
-img {
-  max-width: 100%;
-  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   overflow: hidden;
-  border-radius: 5px;
-  object-fit: cover;
+  aspect-ratio: 1;
 }
 
-.hidden {
-  display: none;
-}
-
-/* Input fields */
-input[type="text"],
-input[type="password"],
-input[type="number"],
-select {
-  padding: 10px;
-  font-size: 16px;
-  background-color: inherit;
-  border-radius: 5px;
-  border: 1px solid white;
-  color: white;
-  outline: none;
-  font-family: "Source Code Pro", monospace;
-  font-size: large;
+#led_grid img {
   width: 100%;
-  box-sizing: border-box;
-}
-select option {
-  background-color: #1b1b29; /* dropdown background */
-  color: white; /* text color */
-  font-family: "Source Code Pro", monospace;
-  font-size: 16px;
+  height: 100%;
+  object-fit: cover;
+  overflow: hidden;
 }
 
-#lbl-error {
-  height: 28px;
-  line-height: 28px;
-  border-radius: 5px;
-  margin: 3px 0px;
+#led_grid #top {
+  grid-area: top;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: 1fr;
+  gap: 0px 0px;
 }
 
-.error {
-  transition: 250ms;
-  background-color: red;
-  color: white;
+#led_grid #right {
+  grid-area: right;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: repeat(6, 1fr);
+  gap: 0px 0px;
 }
 
-label {
-  line-height: 30px;
+#led_grid #left {
+  grid-area: left;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: repeat(6, 1fr);
+  gap: 0px 0px;
 }
 
-.spacer {
-  height: 15px;
+#led_grid #bottom {
+  grid-area: bottom;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: 1fr;
+  gap: 0px 0px;
 }
-
-.hidden {
-  display: none;
-}
-
-select {
-  height: 45px;
-  font-size: large;
+.selectedColor {
+  border: 3px solid black;
 }
