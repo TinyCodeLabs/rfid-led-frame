@@ -24,19 +24,23 @@ document.getElementById("imageInput").addEventListener("change", (e) => {
 
 		ctx.drawImage(img, sx, sy, size, size, 0, 0, 200, 200);
 
-		const ledColors = calculateAmbilight();
-
-		COLORS = ledColors.map(
-			(e) => `${numberToHex(e.r)}${numberToHex(e.g)}${numberToHex(e.b)}`,
-		);
-		for (let i = 0; i < COLORS.length; i++) {
-			const element = COLORS[i];
-			setElementBG(element, i);
-		}
+		renderCanvasAmbilight();
 	};
 
 	img.src = URL.createObjectURL(file);
 });
+
+function renderCanvasAmbilight() {
+	const ledColors = calculateAmbilight();
+
+	COLORS = ledColors.map(
+		(e) => `${numberToHex(e.r)}${numberToHex(e.g)}${numberToHex(e.b)}`,
+	);
+	for (let i = 0; i < COLORS.length; i++) {
+		const element = COLORS[i];
+		setElementBG(element, i);
+	}
+}
 
 initView();
 
@@ -181,4 +185,6 @@ document.getElementById("snap").onclick = () => {
 	const sy = (video.videoHeight - size) / 2;
 
 	ctx.drawImage(video, sx, sy, size, size, 0, 0, size, size);
+
+	renderCanvasAmbilight();
 };
