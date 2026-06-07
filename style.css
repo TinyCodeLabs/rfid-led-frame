@@ -61,7 +61,7 @@ a {
 	aspect-ratio: 1;
 }
 
-#led_grid img {
+#led_grid canvas {
 	width: 100%;
 	height: 100%;
 	object-fit: cover;
@@ -101,4 +101,17 @@ a {
 }
 .selectedColor {
 	border: 3px solid black;
+}
+
+.camera-frame {
+	width: 300px;
+	aspect-ratio: 1 / 1;
+	overflow: hidden;
+	position: relative;
+}
+
+video {
+	width: 100%;
+	height: 100%;
+	object-fit: cover; /* THIS makes it square-cropped */
 }

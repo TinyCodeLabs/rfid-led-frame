@@ -11,9 +11,16 @@
 			<h2>NTAG215 NDEF Writer</h2>
 
 			<div class="container">
+				<div class="camera-frame">
+					<video id="video" autoplay></video>
+				</div>
+				<button id="snap">Capture</button>
+			</div>
+
+			<div class="container">
 				<div id="led_grid">
 					<div class="image">
-						<img src="https://placehold.co/200x400" alt="" />
+						<canvas id="canvas" width="200" height="200"></canvas>
 					</div>
 					<div id="top"></div>
 					<div id="right"></div>
@@ -24,6 +31,12 @@
 
 			<div class="container">
 				<input type="color" name="" id="picker" />
+				<input
+					type="file"
+					id="imageInput"
+					accept="image/*"
+					capture="environment"
+				/>
 			</div>
 
 			<div class="container">
@@ -32,129 +45,7 @@
 				<div id="status">Ready.</div>
 			</div>
 		</div>
-		<script>
-			function setElementBG(color, id) {
-				document.getElementById(id).style.backgroundColor = "#" + color;
-			}
-			let selectedColor = 0;
-
-			function onSelectSpot(id) {
-				document
-					.querySelectorAll(".colorSwap")
-					.forEach((e) => e.classList.remove("selectedColor"));
-				selectedColor = id;
-				document.getElementById("picker").value = "#" + COLORS[id];
-				document
-					.getElementById("c-" + id)
-					.classList.add("selectedColor");
-			}
-			document.getElementById("picker").onchange = (ev) => {
-				let val = document
-					.getElementById("picker")
-					.value.replace("#", "");
-				COLORS[selectedColor] = val;
-				setElementBG(val, "c-" + selectedColor);
-			};
-
-			function randomHexBytes(count) {
-				const bytes = crypto.getRandomValues(new Uint8Array(count));
-				return Array.from(bytes)
-					.map((b) => b.toString(16).padStart(2, "0"))
-					.join("");
-			}
-			let COLORS = [];
-
-			for (let i = 0; i < 24; i++) {
-				COLORS.push("FFFFFF");
-			}
-
-			function generateSpace(
-				start,
-				end,
-				parent,
-				colors,
-				reverse = false,
-			) {
-				if (reverse) {
-					for (let i = end; i >= start; i--) {
-						const element = document.createElement("span");
-						element.style.backgroundColor = "#" + colors[i];
-						element.id = "c-" + i;
-						element.classList.add("colorSwap");
-						element.onclick = () => {
-							onSelectSpot(i);
-						};
-						parent.appendChild(element);
-					}
-				} else {
-					for (let i = start; i <= end; i++) {
-						const element = document.createElement("span");
-						element.style.backgroundColor = "#" + colors[i];
-						element.classList.add("colorSwap");
-						element.id = "c-" + i;
-						element.onclick = () => {
-							onSelectSpot(i);
-						};
-						parent.appendChild(element);
-					}
-				}
-			}
-
-			generateSpace(0, 5, document.getElementById("top"), COLORS);
-			generateSpace(6, 11, document.getElementById("right"), COLORS);
-			generateSpace(
-				12,
-				17,
-				document.getElementById("bottom"),
-				COLORS,
-				true,
-			);
-			generateSpace(
-				17,
-				23,
-				document.getElementById("left"),
-				COLORS,
-				true,
-			);
-
-			document.getElementById("writeBtn").onclick = async () => {
-				if (!("NDEFReader" in window)) {
-					setStatus("Web NFC not supported.");
-					return;
-				}
-
-				try {
-					const hex = COLORS.join("");
-
-					if (!/^[0-9a-fA-F]*$/.test(hex)) {
-						throw new Error("Invalid hex string");
-					}
-
-					const bytes = hexToBytes(hex);
-
-					setStatus("Tap NTAG215...");
-
-					const ndef = new NDEFReader();
-
-					await ndef.write({
-						records: [
-							{
-								recordType: "mime",
-								mediaType: "v/led",
-								data: bytes,
-							},
-						],
-					});
-
-					setStatus(
-						`Write successful.\n` +
-							`Payload size: ${bytes.length} bytes`,
-					);
-				} catch (err) {
-					setStatus("Write failed:\n" + err);
-				}
-			};
-		</script>
+		<script src="ambicalc.js"></script>
 		<script src="script.js"></script>
 	</body>
 </html>
