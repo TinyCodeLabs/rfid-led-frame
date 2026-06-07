@@ -94,7 +94,7 @@ a {
 #led_grid #top {
 	grid-area: top;
 	display: grid;
-	grid-template-columns: repeat(6, 1fr);
+	grid-template-columns: repeat(10, 1fr);
 	grid-template-rows: 1fr;
 	gap: 0px 0px;
 }
@@ -103,7 +103,7 @@ a {
 	grid-area: right;
 	display: grid;
 	grid-template-columns: 1fr;
-	grid-template-rows: repeat(6, 1fr);
+	grid-template-rows: repeat(10, 1fr);
 	gap: 0px 0px;
 }
 
@@ -111,14 +111,14 @@ a {
 	grid-area: left;
 	display: grid;
 	grid-template-columns: 1fr;
-	grid-template-rows: repeat(6, 1fr);
+	grid-template-rows: repeat(10, 1fr);
 	gap: 0px 0px;
 }
 
 #led_grid #bottom {
 	grid-area: bottom;
 	display: grid;
-	grid-template-columns: repeat(6, 1fr);
+	grid-template-columns: repeat(10, 1fr);
 	grid-template-rows: 1fr;
 	gap: 0px 0px;
 }

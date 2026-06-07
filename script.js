@@ -3,7 +3,7 @@ const statusEl = document.getElementById("status");
 let selectedColor = 0;
 
 let COLORS = [];
-for (let i = 0; i < 24; i++) {
+for (let i = 0; i < LEDS_PER_SIDE * 4; i++) {
 	COLORS.push("FFFFFF");
 }
 
@@ -49,10 +49,15 @@ function randomHexBytes(count) {
 
 function initView() {
 	// Create LED-Elements
-	generateSpace(0, 5, document.getElementById("top"), COLORS);
+	/* generateSpace(0, 5, document.getElementById("top"), COLORS);
 	generateSpace(6, 11, document.getElementById("right"), COLORS);
 	generateSpace(12, 17, document.getElementById("bottom"), COLORS, true);
-	generateSpace(18, 23, document.getElementById("left"), COLORS, true);
+	generateSpace(18, 23, document.getElementById("left"), COLORS, true); */
+
+	generateSpace(0, 9, document.getElementById("top"), COLORS);
+	generateSpace(10, 19, document.getElementById("right"), COLORS);
+	generateSpace(20, 29, document.getElementById("bottom"), COLORS, true);
+	generateSpace(30, 39, document.getElementById("left"), COLORS, true);
 }
 
 function setElementBG(color, id) {
