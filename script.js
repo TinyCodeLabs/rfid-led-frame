@@ -7,29 +7,6 @@ for (let i = 0; i < 24; i++) {
 	COLORS.push("FFFFFF");
 }
 
-document.getElementById("imageInput").addEventListener("change", (e) => {
-	const file = e.target.files[0];
-	if (!file) return;
-
-	const img = new Image();
-
-	img.onload = () => {
-		// Center crop to square
-		const size = Math.min(img.width, img.height);
-
-		const sx = (img.width - size) / 2;
-		const sy = (img.height - size) / 2;
-
-		ctx.clearRect(0, 0, 200, 200);
-
-		ctx.drawImage(img, sx, sy, size, size, 0, 0, 200, 200);
-
-		renderCanvasAmbilight();
-	};
-
-	img.src = URL.createObjectURL(file);
-});
-
 function renderCanvasAmbilight() {
 	const ledColors = calculateAmbilight();
 
@@ -165,6 +142,34 @@ document.getElementById("writeBtn").onclick = writeColorsToTag;
 
 const video = document.getElementById("video");
 
+const pickerContainer = document.getElementById("pickerContainer");
+const captureContainer = document.getElementById("captureContainer");
+
+function showTagWriteContainer() {
+	document.getElementById("tagContainer").style.display = "flex";
+}
+function hiteTagWriteContainer() {
+	ocument.getElementById("tagContainer").style.display = "none";
+}
+
+function resetSnaping() {
+	video.style.display = "unset";
+	canvas.style.display = "none";
+	pickerContainer.style.display = "none";
+	captureContainer.style.display = "flex";
+
+	hiteTagWriteContainer();
+}
+
+function pictureTaken() {
+	canvas.style.display = "unset";
+	video.style.display = "none";
+	pickerContainer.style.display = "flex";
+	captureContainer.style.display = "none";
+
+	showTagWriteContainer();
+}
+
 navigator.mediaDevices
 	.getUserMedia({
 		video: { facingMode: "environment" },
@@ -172,7 +177,16 @@ navigator.mediaDevices
 	.then((stream) => {
 		video.srcObject = stream;
 	});
+
 document.getElementById("snap").onclick = () => {
+	pictureTaken();
+
+	renderVideoToCanvas();
+
+	renderCanvasAmbilight();
+};
+
+function renderVideoToCanvas() {
 	const size = Math.min(video.videoWidth, video.videoHeight);
 
 	canvas.width = size;
@@ -185,6 +199,4 @@ document.getElementById("snap").onclick = () => {
 	const sy = (video.videoHeight - size) / 2;
 
 	ctx.drawImage(video, sx, sy, size, size, 0, 0, size, size);
-
-	renderCanvasAmbilight();
-};
+}

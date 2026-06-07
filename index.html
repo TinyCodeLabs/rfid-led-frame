@@ -11,16 +11,15 @@
 			<h2>NTAG215 NDEF Writer</h2>
 
 			<div class="container">
-				<div class="camera-frame">
-					<video id="video" autoplay></video>
-				</div>
-				<button id="snap">Capture</button>
-			</div>
-
-			<div class="container">
 				<div id="led_grid">
 					<div class="image">
-						<canvas id="canvas" width="200" height="200"></canvas>
+						<canvas
+							id="canvas"
+							width="200"
+							height="200"
+							style="display: none"
+						></canvas>
+						<video id="video" autoplay></video>
 					</div>
 					<div id="top"></div>
 					<div id="right"></div>
@@ -28,18 +27,14 @@
 					<div id="bottom"></div>
 				</div>
 			</div>
-
-			<div class="container">
+			<div class="container" id="captureContainer">
+				<button id="snap">Capture</button>
+			</div>
+			<div class="container" id="pickerContainer" style="display: none">
 				<input type="color" name="" id="picker" />
-				<input
-					type="file"
-					id="imageInput"
-					accept="image/*"
-					capture="environment"
-				/>
 			</div>
 
-			<div class="container">
+			<div class="container" id="tagContainer" style="display: none">
 				<button id="writeBtn">Write Tag</button>
 
 				<div id="status">Ready.</div>

@@ -21,8 +21,6 @@ function calculateAmbilight() {
 		const x1 = Math.floor(i * (width / LEDS_PER_SIDE));
 		const x2 = Math.floor((i + 1) * (width / LEDS_PER_SIDE) - 1);
 
-		console.log(x1, x2);
-
 		leds.push(averageRegion(imageData, width, x1, 0, x2, EDGE_DEPTH));
 	}
 
