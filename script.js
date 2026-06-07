@@ -77,14 +77,23 @@ function onSelectSpot(id) {
 	document
 		.querySelectorAll(".colorSwap")
 		.forEach((e) => e.classList.remove("selectedColor"));
+
 	selectedColor = id;
-	document.getElementById("picker").value = "#" + COLORS[id];
+
 	document.getElementById("c-" + id).classList.add("selectedColor");
+	document.getElementById("picker").style.display = "unset";
+	document.getElementById("noPicker").style.display = "none";
+
+	let c = hexToBytes(COLORS[id]);
+
+	setColor(c[0], c[1], c[2]);
 }
 
 // lisen to color picker changes
-document.getElementById("picker").onchange = (ev) => {
-	let val = document.getElementById("picker").value.replace("#", "");
+onPickerChange = (color) => {
+	let c = color.rgbColor();
+
+	let val = c.map((e) => numberToHex(e)).join("");
 	COLORS[selectedColor] = val;
 	setElementBG(val, selectedColor);
 };

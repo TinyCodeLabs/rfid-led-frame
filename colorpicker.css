@@ -1,0 +1,89 @@
+* {
+	box-sizing: border-box;
+}
+
+#picker {
+	padding: 1rem;
+}
+
+[type="range"] {
+	-webkit-appearance: none;
+	appearance: none;
+	background-color: currentColor;
+	background-origin: content-box;
+	background-repeat: no-repeat;
+	border-radius: 2rem;
+	display: block;
+	color: inherit;
+	height: 3rem;
+	margin: 1rem 0;
+	padding: 0;
+	width: 100%;
+}
+[type="range"]:focus {
+	outline: none;
+}
+[type="range"]::-moz-range-track {
+	background-color: transparent;
+}
+[type="range"]::-webkit-slider-runnable-track {
+	margin: 0 -1rem;
+}
+[type="range"]::-webkit-slider-thumb {
+	appearance: none;
+	background-color: transparent;
+	border-radius: 100%;
+	box-shadow:
+		inset 0 0 0 0.125rem currentColor,
+		inset 0 0 0 0.25rem white;
+	height: 2rem;
+	width: 2rem;
+}
+[type="range"]::-moz-range-thumb {
+	background-color: transparent;
+	border: 0;
+	border-radius: 100%;
+	box-shadow:
+		inset 0 0 0 0.125rem currentColor,
+		inset 0 0 0 0.25rem white;
+	height: 2rem;
+	width: 2rem;
+}
+#sample {
+	border-radius: 2rem;
+	height: 3rem;
+	text-align: right;
+	padding: 0.33rem 1rem;
+	width: 100%;
+}
+#sample div {
+	font-size: 0.75rem;
+	font-weight: 100;
+	line-height: 1.5em;
+}
+#sample .white {
+	color: white;
+}
+#sample .black {
+	color: black;
+}
+
+#hsl-h {
+	background-image: linear-gradient(
+		to right,
+		#f00,
+		#ff0,
+		#0f0,
+		#0ff,
+		#00f,
+		#f0f,
+		#f00
+	);
+}
+
+#hsl-s {
+	background-image: linear-gradient(to right, #888, transparent);
+}
+#hsl-l {
+	background-image: linear-gradient(to right, #000, transparent, #fff);
+}
