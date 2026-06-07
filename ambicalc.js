@@ -1,5 +1,6 @@
 const LEDS_PER_SIDE = 6;
-const EDGE_DEPTH = 25;
+const EDGE_DEPTH = 15;
+const MIN_EDGE = 5;
 
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
@@ -21,7 +22,9 @@ function calculateAmbilight() {
 		let x1 = Math.floor(i * (width / LEDS_PER_SIDE));
 		let x2 = Math.floor((i + 1) * (width / LEDS_PER_SIDE) - 1);
 
-		leds.push(averageRegion(imageData, width, x1, 0, x2, EDGE_DEPTH));
+		leds.push(
+			averageRegion(imageData, width, x1, MIN_EDGE, x2, EDGE_DEPTH),
+		);
 	}
 
 	//
@@ -34,7 +37,7 @@ function calculateAmbilight() {
 		leds.push(
 			averageRegion(
 				imageData,
-				width,
+				width - MIN_EDGE,
 				width - EDGE_DEPTH,
 				y1,
 				width - 1,
@@ -57,7 +60,7 @@ function calculateAmbilight() {
 				x1,
 				height - EDGE_DEPTH,
 				x2,
-				height - 1,
+				height - MIN_EDGE - 1,
 			),
 		);
 	}
@@ -69,7 +72,9 @@ function calculateAmbilight() {
 		const y1 = Math.floor((i * height) / LEDS_PER_SIDE);
 		const y2 = Math.floor(((i + 1) * height) / LEDS_PER_SIDE) - 1;
 
-		leds.push(averageRegion(imageData, width, 0, y1, EDGE_DEPTH - 1, y2));
+		leds.push(
+			averageRegion(imageData, width, MIN_EDGE, y1, EDGE_DEPTH - 1, y2),
+		);
 	}
 
 	return smoothLeds(leds);
