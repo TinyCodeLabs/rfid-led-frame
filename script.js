@@ -8,7 +8,20 @@ for (let i = 0; i < 24; i++) {
 }
 
 function renderCanvasAmbilight() {
-	const ledColors = calculateAmbilight();
+	let ledColors = calculateAmbilight();
+	console.log(ledColors);
+
+	ledColors = ledColors.map((c) => {
+		let hsl = rgbToHsl(c.r, c.g, c.b);
+
+		let rgb = hslToRgb(hsl[0], hsl[1] * 5, hsl[2]);
+		return {
+			r: rgb[0],
+			g: rgb[1],
+			b: rgb[2],
+		};
+	});
+	console.log(ledColors);
 
 	COLORS = ledColors.map(
 		(e) => `${numberToHex(e.r)}${numberToHex(e.g)}${numberToHex(e.b)}`,

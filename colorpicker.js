@@ -22,11 +22,7 @@ var colorPickerValue = {
 		return Math.floor(this.l) + "%";
 	},
 	rgbColor: function () {
-		let c = hslToRgb(
-			Number(this.h) / 360,
-			Number(this.s) / 100,
-			Number(this.l) / 100,
-		);
+		let c = hslToRgb(Number(this.h), Number(this.s), Number(this.l));
 		return c;
 	},
 	getHSLString: function () {
@@ -162,6 +158,9 @@ function setColor(r, g, b) {
  */
 function rgbToHsl(r, g, b) {
 	((r /= 255), (g /= 255), (b /= 255));
+	r = Math.max(0, Math.min(r, 1));
+	g = Math.max(0, Math.min(g, 1));
+	b = Math.max(0, Math.min(b, 1));
 
 	var max = Math.max(r, g, b),
 		min = Math.min(r, g, b);
@@ -205,6 +204,14 @@ function rgbToHsl(r, g, b) {
  * @return  Array           The RGB representation
  */
 function hslToRgb(h, s, l) {
+	h = h / 360;
+	s = s / 100;
+	l = l / 100;
+
+	h = Math.max(0, Math.min(h, 1));
+	s = Math.max(0, Math.min(s, 1));
+	l = Math.max(0, Math.min(l, 1));
+
 	var r, g, b;
 
 	if (s == 0) {
