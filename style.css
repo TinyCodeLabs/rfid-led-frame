@@ -132,3 +132,57 @@ video {
 	height: 100%;
 	object-fit: cover; /* THIS makes it square-cropped */
 }
+
+/* Saturation slider styling */
+#saturation-slider {
+	-webkit-appearance: none;
+	appearance: none;
+	background-color: transparent;
+	background-origin: content-box;
+	background-repeat: no-repeat;
+	border-radius: 2rem;
+	display: block;
+	color: white;
+	height: 3rem;
+	margin: 1rem 0;
+	padding: 0;
+	width: 100%;
+	border: 1px solid white;
+}
+
+#saturation-slider:focus {
+	outline: none;
+}
+
+#saturation-slider::-moz-range-track {
+	background-color: transparent;
+	border: none;
+}
+
+#saturation-slider::-webkit-slider-runnable-track {
+	margin: 0 -1rem;
+}
+
+#saturation-slider::-webkit-slider-thumb {
+	appearance: none;
+	background-color: white;
+	border-radius: 100%;
+	height: 2rem;
+	width: 2rem;
+	cursor: pointer;
+}
+
+#saturation-slider::-moz-range-thumb {
+	background-color: white;
+	border: 0;
+	border-radius: 100%;
+	height: 2rem;
+	width: 2rem;
+	cursor: pointer;
+}
+
+label {
+	display: block;
+	margin-bottom: 10px;
+	font-weight: 300;
+}

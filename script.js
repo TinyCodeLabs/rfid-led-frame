@@ -1,36 +1,50 @@
 const statusEl = document.getElementById("status");
 
 let selectedColor = 0;
+let globalSaturation = 200;
 
-let COLORS = [];
+let BASE_COLORS = [];  // Colors from ambilight + color picker tweaks
+let COLORS = [];       // BASE_COLORS with saturation applied for display
 for (let i = 0; i < LEDS_PER_SIDE * 4; i++) {
+	BASE_COLORS.push("FFFFFF");
 	COLORS.push("FFFFFF");
+}
+
+function applySaturationToDisplay() {
+	// Apply saturation to base colors and update display
+	const displayed = BASE_COLORS.map((hex) => {
+		const bytes = hexToBytes(hex);
+		const c = { r: bytes[0], g: bytes[1], b: bytes[2] };
+
+		let hsl = rgbToHsl(c.r, c.g, c.b);
+		let rgb = hslToRgb(hsl[0], hsl[1] * (globalSaturation / 100), hsl[2]);
+		return `${numberToHex(rgb[0])}${numberToHex(rgb[1])}${numberToHex(rgb[2])}`;
+	});
+
+	COLORS = displayed;
+	for (let i = 0; i < COLORS.length; i++) {
+		setElementBG(COLORS[i], i);
+	}
 }
 
 function renderCanvasAmbilight() {
 	let ledColors = calculateAmbilight();
 
-	ledColors = ledColors.map((c) => {
-		let hsl = rgbToHsl(c.r, c.g, c.b);
-
-		let rgb = hslToRgb(hsl[0], hsl[1] * 5, hsl[2]);
-		return {
-			r: rgb[0],
-			g: rgb[1],
-			b: rgb[2],
-		};
-	});
-
-	COLORS = ledColors.map(
+	BASE_COLORS = ledColors.map(
 		(e) => `${numberToHex(e.r)}${numberToHex(e.g)}${numberToHex(e.b)}`,
 	);
-	for (let i = 0; i < COLORS.length; i++) {
-		const element = COLORS[i];
-		setElementBG(element, i);
-	}
+
+	applySaturationToDisplay();
 }
 
 initView();
+
+// Saturation slider
+document.getElementById("saturation-slider").addEventListener("input", (e) => {
+	globalSaturation = parseInt(e.target.value);
+	document.getElementById("saturation-value").textContent = globalSaturation;
+	applySaturationToDisplay();
+});
 
 function setStatus(msg) {
 	statusEl.textContent = msg;
@@ -54,10 +68,10 @@ function initView() {
 	generateSpace(12, 17, document.getElementById("bottom"), COLORS, true);
 	generateSpace(18, 23, document.getElementById("left"), COLORS, true); */
 
-	generateSpace(0, LEDS_PER_SIDE - 1, document.getElementById("top"), COLORS);
-	generateSpace(LEDS_PER_SIDE, 2 * LEDS_PER_SIDE - 1, document.getElementById("right"), COLORS);
-	generateSpace(2 * LEDS_PER_SIDE, 3 * LEDS_PER_SIDE - 1, document.getElementById("bottom"), COLORS, true);
-	generateSpace(3 * LEDS_PER_SIDE, 4 * LEDS_PER_SIDE - 1, document.getElementById("left"), COLORS, true);
+	generateSpace(0, LEDS_PER_SIDE - 1, document.getElementById("bottom"), COLORS, true);
+	generateSpace(LEDS_PER_SIDE, 2 * LEDS_PER_SIDE - 1, document.getElementById("left"), COLORS, true);
+	generateSpace(2 * LEDS_PER_SIDE, 3 * LEDS_PER_SIDE - 1, document.getElementById("top"), COLORS);
+	generateSpace(3 * LEDS_PER_SIDE, 4 * LEDS_PER_SIDE - 1, document.getElementById("right"), COLORS);
 }
 
 function setElementBG(color, id) {
@@ -100,7 +114,7 @@ function onSelectSpot(id) {
 	document.getElementById("picker").style.display = "unset";
 	document.getElementById("noPicker").style.display = "none";
 
-	let c = hexToBytes(COLORS[id]);
+	let c = hexToBytes(BASE_COLORS[id]);
 
 	setColor(c[0], c[1], c[2]);
 }
@@ -110,8 +124,8 @@ onPickerChange = (color) => {
 	let c = color.rgbColor();
 
 	let val = c.map((e) => numberToHex(e)).join("");
-	COLORS[selectedColor] = val;
-	setElementBG(val, selectedColor);
+	BASE_COLORS[selectedColor] = val;
+	applySaturationToDisplay();
 };
 
 function hexToBytes(hex) {
