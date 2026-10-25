@@ -54,10 +54,10 @@ function initView() {
 	generateSpace(12, 17, document.getElementById("bottom"), COLORS, true);
 	generateSpace(18, 23, document.getElementById("left"), COLORS, true); */
 
-	generateSpace(0, 9, document.getElementById("top"), COLORS);
-	generateSpace(10, 19, document.getElementById("right"), COLORS);
-	generateSpace(20, 29, document.getElementById("bottom"), COLORS, true);
-	generateSpace(30, 39, document.getElementById("left"), COLORS, true);
+	generateSpace(0, LEDS_PER_SIDE - 1, document.getElementById("top"), COLORS);
+	generateSpace(LEDS_PER_SIDE, 2 * LEDS_PER_SIDE - 1, document.getElementById("right"), COLORS);
+	generateSpace(2 * LEDS_PER_SIDE, 3 * LEDS_PER_SIDE - 1, document.getElementById("bottom"), COLORS, true);
+	generateSpace(3 * LEDS_PER_SIDE, 4 * LEDS_PER_SIDE - 1, document.getElementById("left"), COLORS, true);
 }
 
 function setElementBG(color, id) {

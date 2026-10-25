@@ -91,37 +91,31 @@ a {
 	overflow: hidden;
 }
 
-#led_grid #top {
-	grid-area: top;
-	display: grid;
-	grid-template-columns: repeat(10, 1fr);
-	grid-template-rows: 1fr;
-	gap: 0px 0px;
-}
-
-#led_grid #right {
-	grid-area: right;
-	display: grid;
-	grid-template-columns: 1fr;
-	grid-template-rows: repeat(10, 1fr);
-	gap: 0px 0px;
-}
-
-#led_grid #left {
-	grid-area: left;
-	display: grid;
-	grid-template-columns: 1fr;
-	grid-template-rows: repeat(10, 1fr);
-	gap: 0px 0px;
-}
-
+/* Horizontal strips: one row, as many columns as there are children */
+#led_grid #top,
 #led_grid #bottom {
-	grid-area: bottom;
-	display: grid;
-	grid-template-columns: repeat(10, 1fr);
-	grid-template-rows: 1fr;
-	gap: 0px 0px;
+    display: grid;
+    grid-auto-flow: column;              /* add new items as columns, not rows */
+    grid-auto-columns: minmax(0, 1fr);   /* every column gets an equal share */
+    grid-template-rows: 1fr;
+    gap: 0;
 }
+
+/* Vertical strips: one column, as many rows as there are children */
+#led_grid #left,
+#led_grid #right {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-auto-rows: minmax(0, 1fr);      /* every row gets an equal share */
+    gap: 0;
+}
+
+#led_grid #top    { grid-area: top; }
+#led_grid #bottom { grid-area: bottom; }
+#led_grid #left   { grid-area: left; }
+#led_grid #right  { grid-area: right; }
+
+
 .selectedColor {
 	border: 3px solid black;
 }

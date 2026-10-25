@@ -1,4 +1,4 @@
-const LEDS_PER_SIDE = 10;
+const LEDS_PER_SIDE = 22;
 const EDGE_DEPTH = 15;
 const MIN_EDGE = 5;
 
