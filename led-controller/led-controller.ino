@@ -46,28 +46,45 @@ void loop() {
 
       tagPresent = true;
 
-      uint8_t data[128];
+      uint8_t data[NUMPIXELS * 3 + 10];
       uint16_t len;
       
       if (readLedTag(rfid, data, sizeof(data), len))
       {
-          Serial.print("Payload: ");
+          Serial.print("Read ");
+          Serial.print(len / 3);
+          Serial.println(" stored LEDs, interpolating to 88...");
 
           pixels.clear();
 
-          uint8_t led = 0;
-      
-          for (uint16_t i = 0; i+2 < len; i+=3)
+          uint16_t storedLeds = len / 3;  // Number of LEDs stored on tag (should be 44)
+
+          // Interpolate stored LEDs to all 88 display LEDs
+          for (uint8_t led = 0; led < NUMPIXELS; led++)
           {
-              Serial.print(data[i], HEX);
-              Serial.print(data[i + 1], HEX);
-              Serial.print(data[i + 2], HEX);
-              Serial.print(" ");
-              pixels.setPixelColor(led, pixels.Color(data[i], data[i+1], data[i+2]));
-              led++;
+              // Map display LED index to stored LED position
+              float storedPos = (float)led * (storedLeds - 1) / (NUMPIXELS - 1);
+              uint16_t idx1 = (uint16_t)storedPos;
+              uint16_t idx2 = (idx1 + 1 < storedLeds) ? idx1 + 1 : idx1;
+              float blend = storedPos - idx1;
+
+              // Get colors from stored LEDs
+              uint8_t r1 = data[idx1 * 3];
+              uint8_t g1 = data[idx1 * 3 + 1];
+              uint8_t b1 = data[idx1 * 3 + 2];
+
+              uint8_t r2 = data[idx2 * 3];
+              uint8_t g2 = data[idx2 * 3 + 1];
+              uint8_t b2 = data[idx2 * 3 + 2];
+
+              // Linear interpolation
+              uint8_t r = r1 + (r2 - r1) * blend;
+              uint8_t g = g1 + (g2 - g1) * blend;
+              uint8_t b = b1 + (b2 - b1) * blend;
+
+              pixels.setPixelColor(led, pixels.Color(r, g, b));
           }
-      
-          Serial.println();
+
           pixels.show();
       }
       else
