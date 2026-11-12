@@ -1,9 +1,18 @@
 const LEDS_PER_SIDE = 11;
 const EDGE_DEPTH = 15;
 const MIN_EDGE = 5;
+const GAMMA = 2.2;
 
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
+
+function applyGamma(value) {
+	return Math.pow(value / 255, 1 / GAMMA) * 255;
+}
+
+function removeGamma(value) {
+	return Math.pow(value / 255, GAMMA) * 255;
+}
 
 function calculateAmbilight() {
 	const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height, {
@@ -92,18 +101,18 @@ function averageRegion(imageData, width, x1, y1, x2, y2) {
 		for (let x = x1; x <= x2; x++) {
 			const idx = (y * width + x) * 4;
 
-			r += data[idx];
-			g += data[idx + 1];
-			b += data[idx + 2];
+			r += removeGamma(data[idx]);
+			g += removeGamma(data[idx + 1]);
+			b += removeGamma(data[idx + 2]);
 
 			count++;
 		}
 	}
 
 	let result = {
-		r: Math.round(r / count),
-		g: Math.round(g / count),
-		b: Math.round(b / count),
+		r: Math.round(applyGamma(r / count)),
+		g: Math.round(applyGamma(g / count)),
+		b: Math.round(applyGamma(b / count)),
 	};
 
 	return result;
