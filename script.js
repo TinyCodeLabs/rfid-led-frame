@@ -10,6 +10,14 @@ for (let i = 0; i < LEDS_PER_SIDE * 4; i++) {
 	COLORS.push("FFFFFF");
 }
 
+function applyGamma(value) {
+	return Math.pow(value / 255, 1 / GAMMA) * 255;
+}
+
+function removeGamma(value) {
+	return Math.pow(value / 255, GAMMA) * 255;
+}
+
 function applySaturationToDisplay() {
 	// Apply saturation to base colors and update display
 	const displayed = BASE_COLORS.map((hex) => {
@@ -18,7 +26,15 @@ function applySaturationToDisplay() {
 
 		let hsl = rgbToHsl(c.r, c.g, c.b);
 		let rgb = hslToRgb(hsl[0], hsl[1] * (globalSaturation / 100), hsl[2]);
-		return `${numberToHex(rgb[0])}${numberToHex(rgb[1])}${numberToHex(rgb[2])}`;
+
+		// Apply gamma compression for perceptually correct colors
+		const gammaCorrected = [
+			Math.round(removeGamma(rgb[0])),
+			Math.round(removeGamma(rgb[1])),
+			Math.round(removeGamma(rgb[2]))
+		];
+
+		return `${numberToHex(gammaCorrected[0])}${numberToHex(gammaCorrected[1])}${numberToHex(gammaCorrected[2])}`;
 	});
 
 	COLORS = displayed;
