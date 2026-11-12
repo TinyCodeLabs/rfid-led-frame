@@ -193,7 +193,61 @@ async function writeColorsToTag() {
 		setStatus("Write failed:\n" + err);
 	}
 }
+
+async function readColorsFromTag() {
+	if (!("NDEFReader" in window)) {
+		setStatus("Web NFC not supported.");
+		return;
+	}
+
+	try {
+		setStatus("Tap tag to read...");
+		const ndef = new NDEFReader();
+
+		await ndef.scan();
+
+		ndef.onreading = (event) => {
+			try {
+				const records = event.message.records;
+				const ledRecord = records.find((r) => r.mediaType === "v/led");
+
+				if (!ledRecord) {
+					setStatus("No LED data found on tag.");
+					return;
+				}
+
+				const data = new Uint8Array(ledRecord.data);
+
+				if (data.length !== LEDS_PER_SIDE * 4 * 3) {
+					setStatus(
+						`Invalid LED data size. Expected ${LEDS_PER_SIDE * 4 * 3} bytes, got ${data.length}.`,
+					);
+					return;
+				}
+
+				BASE_COLORS = [];
+				for (let i = 0; i < data.length; i += 3) {
+					const hex =
+						numberToHex(data[i]) +
+						numberToHex(data[i + 1]) +
+						numberToHex(data[i + 2]);
+					BASE_COLORS.push(hex);
+				}
+
+				applySaturationToDisplay();
+				setStatus(`Read ${BASE_COLORS.length} colors from tag.`);
+				showTagWriteContainer();
+			} catch (err) {
+				setStatus("Error reading tag:\n" + err);
+			}
+		};
+	} catch (err) {
+		setStatus("Scan failed:\n" + err);
+	}
+}
+
 document.getElementById("writeBtn").onclick = writeColorsToTag;
+document.getElementById("readBtn").onclick = readColorsFromTag;
 
 const video = document.getElementById("video");
 
