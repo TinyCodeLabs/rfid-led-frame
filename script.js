@@ -227,10 +227,14 @@ async function readColorsFromTag() {
 
 				BASE_COLORS = [];
 				for (let i = 0; i < data.length; i += 3) {
+					// Apply gamma correction to convert from compressed storage values to linear editing values
+					const r = Math.round(applyGamma(data[i]));
+					const g = Math.round(applyGamma(data[i + 1]));
+					const b = Math.round(applyGamma(data[i + 2]));
 					const hex =
-						numberToHex(data[i]) +
-						numberToHex(data[i + 1]) +
-						numberToHex(data[i + 2]);
+						numberToHex(r) +
+						numberToHex(g) +
+						numberToHex(b);
 					BASE_COLORS.push(hex);
 				}
 
