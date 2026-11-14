@@ -524,50 +524,32 @@ async function writeNfcTag() {
       ],
     };
 
-    // Try modern NDEFWriter API first
-    if (typeof NDEFWriter !== 'undefined') {
-      const writer = new NDEFWriter();
-      await writer.write(message);
-      dom.status.textContent = `Tag written successfully. ${CONSTANTS.PAYLOAD_SIZE} bytes written.`;
-      return;
-    }
-
-    // Fallback: Use NDEFReader approach (similar to read implementation)
+    // Use NDEFReader approach (same pattern as working read implementation)
     const reader = new NDEFReader();
 
-    // Try using makeReadOnly which triggers write capability
-    if (typeof reader.makeReadOnly === 'function') {
-      try {
-        await reader.makeReadOnly(message);
-        dom.status.textContent = `Tag written successfully. ${CONSTANTS.PAYLOAD_SIZE} bytes written.`;
-        return;
-      } catch (e) {
-        console.error('makeReadOnly failed:', e.message);
-      }
-    }
-
-    // Fallback: scan-based approach
-    dom.status.textContent = 'Scanning for tag...';
-    await reader.scan();
-
+    // Set up handlers FIRST, before scanning
     reader.onreading = async (event) => {
       try {
-        // Try to write if method available on reader
+        // Attempt to write when tag is detected
         if (typeof reader.write === 'function') {
           await reader.write(message);
           dom.status.textContent = `Tag written successfully. ${CONSTANTS.PAYLOAD_SIZE} bytes written.`;
         } else {
-          dom.status.textContent = 'Write not supported on this implementation.';
+          dom.status.textContent = 'Write not available on this implementation.';
         }
       } catch (writeError) {
-        console.error('Write error:', writeError.message);
+        console.error('Write error:', writeError);
         dom.status.textContent = `Write failed: ${writeError.message}`;
       }
     };
 
-    reader.onerror = () => {
-      dom.status.textContent = 'Tag write cancelled or out of range.';
+    reader.onerror = (error) => {
+      console.error('Scan error:', error);
+      dom.status.textContent = 'Tag detection cancelled.';
     };
+
+    // Start scanning
+    await reader.scan();
 
   } catch (error) {
     console.error('Write error:', error.name, error.message);
