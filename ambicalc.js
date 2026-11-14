@@ -1,6 +1,6 @@
 const LEDS_PER_SIDE = 11;
-const EDGE_DEPTH = 15;
-const MIN_EDGE = 5;
+const EDGE_DEPTH = 8;  // Reduced from 15 - sample closer to edge
+const MIN_EDGE = 2;    // Reduced from 5 - narrower detection band
 const GAMMA = 2.2;
 
 const canvas = document.getElementById("canvas");

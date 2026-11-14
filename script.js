@@ -26,8 +26,9 @@ function calculatePowerDraw(rgbArray) {
 	return (20 * totalRGB) / 255;
 }
 
-function limitBrightness(rgbArray, maxmA = 2500) {
+function limitBrightness(rgbArray, maxmA = 2300) {
 	// Scale all RGB values proportionally if power draw exceeds threshold
+	// Using 2300mA target ensures actual draw stays below 2500mA (accounts for ~8% system overhead)
 	const currentDraw = calculatePowerDraw(rgbArray);
 
 	if (currentDraw <= maxmA) {
