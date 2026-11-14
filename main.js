@@ -508,30 +508,21 @@ function encodePayload() {
  * Write colors to NTAG215 tag via Web NFC API
  */
 async function writeNfcTag() {
-  // Check if Web NFC API is available
-  if (!('NDEFWriter' in window) || !('NDEFMessage' in window)) {
-    dom.status.textContent = 'Web NFC not supported on this device or browser.';
-    return;
-  }
-
   try {
     dom.status.textContent = 'Tap NTAG215...';
 
     const payload = encodePayload();
 
-    // Try to use the newer NDEFMessage API
-    let message;
-    if ('NDEFMessage' in window) {
-      message = new NDEFMessage({
-        records: [
-          {
-            recordType: 'mime',
-            mediaType: CONSTANTS.NFC_MEDIA_TYPE,
-            data: payload,
-          },
-        ],
-      });
-    }
+    // Create NDEF message with recorded colors
+    const message = {
+      records: [
+        {
+          recordType: 'mime',
+          mediaType: CONSTANTS.NFC_MEDIA_TYPE,
+          data: payload,
+        },
+      ],
+    };
 
     const writer = new NDEFWriter();
     await writer.write(message);
@@ -544,6 +535,8 @@ async function writeNfcTag() {
       dom.status.textContent = 'NFC permission denied.';
     } else if (error.name === 'AbortError') {
       dom.status.textContent = 'Tag write cancelled.';
+    } else if (error.name === 'ReferenceError' || error.message.includes('is not defined')) {
+      dom.status.textContent = 'Web NFC API not available. Use Chrome on Android.';
     } else {
       dom.status.textContent = `Write failed: ${error.message}`;
     }
@@ -554,12 +547,6 @@ async function writeNfcTag() {
  * Read colors from NTAG215 tag via Web NFC API
  */
 async function readNfcTag() {
-  // Check if Web NFC API is available
-  if (!('NDEFReader' in window)) {
-    dom.status.textContent = 'Web NFC not supported on this device or browser.';
-    return;
-  }
-
   try {
     dom.status.textContent = 'Tap tag to read...';
 
@@ -628,6 +615,8 @@ async function readNfcTag() {
       dom.status.textContent = 'NFC permission denied.';
     } else if (error.name === 'AbortError') {
       dom.status.textContent = 'Tag read cancelled.';
+    } else if (error.name === 'ReferenceError' || error.message.includes('is not defined')) {
+      dom.status.textContent = 'Web NFC API not available. Use Chrome on Android.';
     } else {
       dom.status.textContent = `Read failed: ${error.message}`;
     }
