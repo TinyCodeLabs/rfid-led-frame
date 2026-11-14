@@ -77,7 +77,7 @@ function calculateAmbilight() {
 		leds.push(
 			averageRegion(
 				imageData,
-				width - MIN_EDGE,
+				width,
 				width - EDGE_DEPTH,
 				y1,
 				width - 1,
