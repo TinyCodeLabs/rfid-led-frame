@@ -523,7 +523,9 @@ async function writeNfcTag() {
     const ndef = new NDEFReader();
 
     dom.status.textContent = 'Tap NTAG215 now...';
-    await ndef.write({
+
+    // Create write promise with timeout
+    const writePromise = ndef.write({
 			records: [
 				{
 					recordType: "mime",
@@ -532,6 +534,13 @@ async function writeNfcTag() {
 				},
 			],
 		});
+
+    // Add 30 second timeout
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Write timeout - tag not detected')), 30000)
+    );
+
+    await Promise.race([writePromise, timeoutPromise]);
 
     dom.status.textContent = `Write successful. Payload size: ${CONSTANTS.PAYLOAD_SIZE} bytes`;
   } catch (error) {
