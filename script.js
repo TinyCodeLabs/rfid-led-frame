@@ -18,9 +18,35 @@ function removeGamma(value) {
 	return Math.pow(value / 255, GAMMA) * 255;
 }
 
+function calculatePowerDraw(rgbArray) {
+	// Calculate total power draw in mA
+	// Each color channel at full brightness = 20mA
+	// Total = 20 * (sum of all R+G+B values) / 255
+	const totalRGB = rgbArray.reduce((sum, rgb) => sum + (rgb[0] + rgb[1] + rgb[2]), 0);
+	return (20 * totalRGB) / 255;
+}
+
+function limitBrightness(rgbArray, maxmA = 2500) {
+	// Scale all RGB values proportionally if power draw exceeds threshold
+	const currentDraw = calculatePowerDraw(rgbArray);
+
+	if (currentDraw <= maxmA) {
+		return { scaled: rgbArray, factor: 1.0, currentDraw };
+	}
+
+	const scaleFactor = maxmA / currentDraw;
+	const scaled = rgbArray.map((rgb) => [
+		Math.round(rgb[0] * scaleFactor),
+		Math.round(rgb[1] * scaleFactor),
+		Math.round(rgb[2] * scaleFactor),
+	]);
+
+	return { scaled, factor: scaleFactor, currentDraw };
+}
+
 function applySaturationToDisplay() {
 	// Apply saturation to base colors and update display
-	const displayed = BASE_COLORS.map((hex) => {
+	const gammaCorrectedRGB = BASE_COLORS.map((hex) => {
 		const bytes = hexToBytes(hex);
 		const c = { r: bytes[0], g: bytes[1], b: bytes[2] };
 
@@ -28,18 +54,32 @@ function applySaturationToDisplay() {
 		let rgb = hslToRgb(hsl[0], hsl[1] * (globalSaturation / 100), hsl[2]);
 
 		// Apply gamma compression for perceptually correct colors
-		const gammaCorrected = [
+		return [
 			Math.round(removeGamma(rgb[0])),
 			Math.round(removeGamma(rgb[1])),
 			Math.round(removeGamma(rgb[2]))
 		];
-
-		return `${numberToHex(gammaCorrected[0])}${numberToHex(gammaCorrected[1])}${numberToHex(gammaCorrected[2])}`;
 	});
+
+	// Apply brightness limiting if needed
+	const { scaled: limitedRGB, factor, currentDraw } = limitBrightness(gammaCorrectedRGB);
+
+	// Convert to hex and display
+	const displayed = limitedRGB.map((rgb) =>
+		`${numberToHex(rgb[0])}${numberToHex(rgb[1])}${numberToHex(rgb[2])}`
+	);
 
 	COLORS = displayed;
 	for (let i = 0; i < COLORS.length; i++) {
 		setElementBG(COLORS[i], i);
+	}
+
+	// Update status with power draw info
+	const brightnessPct = Math.round(factor * 100);
+	const powerInfo = `Power: ${Math.round(currentDraw)}mA / 2500mA max`;
+	const brightnessInfo = factor < 1.0 ? ` (Brightness: ${brightnessPct}%)` : '';
+	if (document.getElementById('power-status')) {
+		document.getElementById('power-status').textContent = powerInfo + brightnessInfo;
 	}
 }
 
