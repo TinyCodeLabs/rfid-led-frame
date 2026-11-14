@@ -572,6 +572,28 @@ async function readNfcTag() {
 
           state.ledColors = ledColors;
           state.selectedLedIndex = null;
+
+          // Update captured colors so reset works from tag values
+          for (let i = 0; i < CONSTANTS.TOTAL_LEDS; i++) {
+            capturedColors[i] = {
+              h: ledColors[i].h,
+              s: ledColors[i].s,
+              l: ledColors[i].l,
+            };
+          }
+
+          // Show UI for editing
+          if (dom.video.style.display !== 'none') {
+            dom.video.style.display = 'none';
+            dom.canvas.style.display = 'none';
+            dom.captureContainer.style.display = 'none';
+            document.getElementById('recaptureContainer').style.display = 'block';
+            dom.pickerContainer.style.display = 'block';
+            dom.tagContainer.style.display = 'block';
+          }
+
+          dom.noPicker.style.display = 'block';
+          dom.picker.style.display = 'none';
           updateColorPicker();
           dom.status.textContent = `Tag read successfully. ${CONSTANTS.PAYLOAD_SIZE} bytes loaded.`;
           return;
