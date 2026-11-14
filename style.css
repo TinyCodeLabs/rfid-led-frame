@@ -101,7 +101,7 @@ a {
     gap: 0;
 }
 
-/* BOTTOM edge displays right-to-left (reversed) */
+/* BOTTOM edge displays right-to-left (reverse the visual order) */
 #led_grid #bottom {
     grid-auto-flow: column-reverse;
 }
@@ -115,7 +115,7 @@ a {
     gap: 0;
 }
 
-/* LEFT edge displays bottom-to-top (reversed) */
+/* LEFT edge displays bottom-to-top (reverse the visual order) */
 #led_grid #left {
     grid-auto-flow: row-reverse;
 }

@@ -208,8 +208,8 @@ function analyzeAmbilight(canvas) {
     let rgb;
 
     if (edge === 'bottom') {
-      // Bottom edge: right-to-left (reversed), y near size-1
-      const x = (CONSTANTS.LEDS_PER_SIDE - 1 - ledIndex) * ledWidth;
+      // Bottom edge: left-to-right, CSS reverse displays as right-to-left
+      const x = ledIndex * ledWidth;
       rgb = averageRegionRgb(
         data,
         Math.floor(x),
@@ -219,8 +219,8 @@ function analyzeAmbilight(canvas) {
         size
       );
     } else if (edge === 'left') {
-      // Left edge: bottom-to-top (reversed), x = 0
-      const y = (CONSTANTS.LEDS_PER_SIDE - 1 - ledIndex) * ledWidth;
+      // Left edge: top-to-bottom, CSS reverse displays as bottom-to-top
+      const y = ledIndex * ledWidth;
       rgb = averageRegionRgb(
         data,
         0,
@@ -230,7 +230,7 @@ function analyzeAmbilight(canvas) {
         size
       );
     } else if (edge === 'top') {
-      // Top edge: left-to-right (normal), y = 0
+      // Top edge: left-to-right (normal order)
       const x = ledIndex * ledWidth;
       rgb = averageRegionRgb(
         data,
@@ -241,7 +241,7 @@ function analyzeAmbilight(canvas) {
         size
       );
     } else if (edge === 'right') {
-      // Right edge: top-to-bottom (normal), x near size-1
+      // Right edge: top-to-bottom (normal order)
       const y = ledIndex * ledWidth;
       rgb = averageRegionRgb(
         data,
