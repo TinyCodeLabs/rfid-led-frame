@@ -101,18 +101,19 @@ function averageRegion(imageData, width, x1, y1, x2, y2) {
 		for (let x = x1; x <= x2; x++) {
 			const idx = (y * width + x) * 4;
 
-			r += removeGamma(data[idx]);
-			g += removeGamma(data[idx + 1]);
-			b += removeGamma(data[idx + 2]);
+			// Average raw pixel values without gamma correction
+			r += data[idx];
+			g += data[idx + 1];
+			b += data[idx + 2];
 
 			count++;
 		}
 	}
 
 	let result = {
-		r: Math.round(applyGamma(r / count)),
-		g: Math.round(applyGamma(g / count)),
-		b: Math.round(applyGamma(b / count)),
+		r: Math.round(r / count),
+		g: Math.round(g / count),
+		b: Math.round(b / count),
 	};
 
 	return result;
