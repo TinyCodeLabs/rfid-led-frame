@@ -508,8 +508,9 @@ function encodePayload() {
  * Write colors to NTAG215 tag via Web NFC API
  */
 async function writeNfcTag() {
-  if (!('NDEFReader' in window)) {
-    dom.status.textContent = 'Web NFC not supported on this device.';
+  // Check if Web NFC API is available
+  if (!('NDEFWriter' in window) || !('NDEFMessage' in window)) {
+    dom.status.textContent = 'Web NFC not supported on this device or browser.';
     return;
   }
 
@@ -517,22 +518,35 @@ async function writeNfcTag() {
     dom.status.textContent = 'Tap NTAG215...';
 
     const payload = encodePayload();
-    const ndef = new NDEFMessage({
-      records: [
-        {
-          recordType: 'mime',
-          mediaType: CONSTANTS.NFC_MEDIA_TYPE,
-          data: payload,
-        },
-      ],
-    });
+
+    // Try to use the newer NDEFMessage API
+    let message;
+    if ('NDEFMessage' in window) {
+      message = new NDEFMessage({
+        records: [
+          {
+            recordType: 'mime',
+            mediaType: CONSTANTS.NFC_MEDIA_TYPE,
+            data: payload,
+          },
+        ],
+      });
+    }
 
     const writer = new NDEFWriter();
-    await writer.write(ndef);
+    await writer.write(message);
 
     dom.status.textContent = `Tag written successfully. ${CONSTANTS.PAYLOAD_SIZE} bytes written.`;
   } catch (error) {
-    dom.status.textContent = `Write failed: ${error.message}`;
+    if (error.name === 'NotSupportedError') {
+      dom.status.textContent = 'Web NFC not supported. Try using Chrome on Android.';
+    } else if (error.name === 'NotAllowedError') {
+      dom.status.textContent = 'NFC permission denied.';
+    } else if (error.name === 'AbortError') {
+      dom.status.textContent = 'Tag write cancelled.';
+    } else {
+      dom.status.textContent = `Write failed: ${error.message}`;
+    }
   }
 }
 
@@ -540,8 +554,9 @@ async function writeNfcTag() {
  * Read colors from NTAG215 tag via Web NFC API
  */
 async function readNfcTag() {
+  // Check if Web NFC API is available
   if (!('NDEFReader' in window)) {
-    dom.status.textContent = 'Web NFC not supported on this device.';
+    dom.status.textContent = 'Web NFC not supported on this device or browser.';
     return;
   }
 
@@ -607,7 +622,15 @@ async function readNfcTag() {
       dom.status.textContent = 'Tag read cancelled.';
     };
   } catch (error) {
-    dom.status.textContent = `Read failed: ${error.message}`;
+    if (error.name === 'NotSupportedError') {
+      dom.status.textContent = 'Web NFC not supported. Try using Chrome on Android.';
+    } else if (error.name === 'NotAllowedError') {
+      dom.status.textContent = 'NFC permission denied.';
+    } else if (error.name === 'AbortError') {
+      dom.status.textContent = 'Tag read cancelled.';
+    } else {
+      dom.status.textContent = `Read failed: ${error.message}`;
+    }
   }
 }
 
