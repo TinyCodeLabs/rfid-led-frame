@@ -453,6 +453,15 @@ function captureFrame() {
   state.ledColors = analyzeAmbilight(dom.canvas);
   state.selectedLedIndex = null;
 
+  // Store captured colors for reset functionality
+  for (let i = 0; i < CONSTANTS.TOTAL_LEDS; i++) {
+    capturedColors[i] = {
+      h: state.ledColors[i].h,
+      s: state.ledColors[i].s,
+      l: state.ledColors[i].l,
+    };
+  }
+
   // Update UI
   dom.video.style.display = 'none';
   dom.canvas.style.display = 'block';
@@ -580,6 +589,40 @@ async function readNfcTag() {
 }
 
 // ============================================================================
+// LED EDITING HELPERS
+// ============================================================================
+
+/**
+ * Store the initial captured colors so we can reset to them
+ */
+const capturedColors = [];
+
+/**
+ * Reset selected LED to its captured color
+ */
+function resetLedToCapture() {
+  if (state.selectedLedIndex === null) return;
+  if (!capturedColors[state.selectedLedIndex]) return;
+
+  state.ledColors[state.selectedLedIndex] = {
+    h: capturedColors[state.selectedLedIndex].h,
+    s: capturedColors[state.selectedLedIndex].s,
+    l: capturedColors[state.selectedLedIndex].l,
+  };
+  updateColorPicker();
+}
+
+/**
+ * Deselect the currently selected LED
+ */
+function deselectLed() {
+  state.selectedLedIndex = null;
+  dom.noPicker.style.display = 'block';
+  dom.picker.style.display = 'none';
+  renderLedGrid(state.ledColors, state.globalSaturation);
+}
+
+// ============================================================================
 // EVENT HANDLERS
 // ============================================================================
 
@@ -678,6 +721,9 @@ async function initialize() {
     left: document.getElementById('left'),
   };
 
+  const resetLedBtn = document.getElementById('resetLedBtn');
+  const deselectBtn = document.getElementById('deselectBtn');
+
   // Set up event listeners
   dom.snap.addEventListener('click', captureFrame);
   dom.hslH.addEventListener('input', onHueChange);
@@ -686,6 +732,8 @@ async function initialize() {
   dom.saturationSlider.addEventListener('input', onGlobalSaturationChange);
   dom.readBtn.addEventListener('click', readNfcTag);
   dom.writeBtn.addEventListener('click', writeNfcTag);
+  resetLedBtn.addEventListener('click', resetLedToCapture);
+  deselectBtn.addEventListener('click', deselectLed);
 
   // Initialize camera
   await initializeCamera();
