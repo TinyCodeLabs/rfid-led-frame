@@ -509,7 +509,7 @@ function encodePayload() {
  */
 async function writeNfcTag() {
   try {
-    dom.status.textContent = 'Tap NTAG215...';
+    dom.status.textContent = 'Tap NTAG215 to write...';
 
     const payload = encodePayload();
 
@@ -524,12 +524,52 @@ async function writeNfcTag() {
       ],
     };
 
-    const writer = new NDEFWriter();
-    await writer.write(message);
+    // Try modern NDEFWriter API first
+    if (typeof NDEFWriter !== 'undefined') {
+      const writer = new NDEFWriter();
+      await writer.write(message);
+      dom.status.textContent = `Tag written successfully. ${CONSTANTS.PAYLOAD_SIZE} bytes written.`;
+      return;
+    }
 
-    dom.status.textContent = `Tag written successfully. ${CONSTANTS.PAYLOAD_SIZE} bytes written.`;
+    // Fallback: Use NDEFReader approach (similar to read implementation)
+    const reader = new NDEFReader();
+
+    // Try using makeReadOnly which triggers write capability
+    if (typeof reader.makeReadOnly === 'function') {
+      try {
+        await reader.makeReadOnly(message);
+        dom.status.textContent = `Tag written successfully. ${CONSTANTS.PAYLOAD_SIZE} bytes written.`;
+        return;
+      } catch (e) {
+        console.error('makeReadOnly failed:', e.message);
+      }
+    }
+
+    // Fallback: scan-based approach
+    dom.status.textContent = 'Scanning for tag...';
+    await reader.scan();
+
+    reader.onreading = async (event) => {
+      try {
+        // Try to write if method available on reader
+        if (typeof reader.write === 'function') {
+          await reader.write(message);
+          dom.status.textContent = `Tag written successfully. ${CONSTANTS.PAYLOAD_SIZE} bytes written.`;
+        } else {
+          dom.status.textContent = 'Write not supported on this implementation.';
+        }
+      } catch (writeError) {
+        console.error('Write error:', writeError.message);
+        dom.status.textContent = `Write failed: ${writeError.message}`;
+      }
+    };
+
+    reader.onerror = () => {
+      dom.status.textContent = 'Tag write cancelled or out of range.';
+    };
+
   } catch (error) {
-    // Log for debugging
     console.error('Write error:', error.name, error.message);
 
     if (error.name === 'NotSupportedError') {
@@ -538,8 +578,6 @@ async function writeNfcTag() {
       dom.status.textContent = 'NFC permission denied. Check device NFC settings.';
     } else if (error.name === 'AbortError') {
       dom.status.textContent = 'Tag write cancelled or tag out of range.';
-    } else if (error.name === 'ReferenceError' || error.message.includes('is not defined')) {
-      dom.status.textContent = 'NDEFWriter not available.';
     } else if (error.name === 'InvalidStateError') {
       dom.status.textContent = 'NFC session error. Try again.';
     } else if (error.name === 'OperationError') {
