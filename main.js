@@ -509,23 +509,36 @@ function encodePayload() {
  */
 async function writeNfcTag() {
   try {
+
+    if (!("NDEFReader" in window)) {
+		dom.status.textContent = "Web NFC not supported.";
+		return;
+	}
+
     dom.status.textContent = 'Tap NTAG215...';
 
     const payload = encodePayload();
+    console.log('Payload size:', payload.length);
 
     // Create NDEF message with recorded colors
     const ndef = new NDEFReader();
 
+    // Convert Uint8Array to ArrayBuffer for compatibility
+    const buffer = payload.buffer.slice(payload.byteOffset, payload.byteOffset + payload.byteLength);
+    console.log('Buffer size:', buffer.byteLength);
+
     // Write directly using NDEFReader.write()
+    console.log('Attempting write...');
     await ndef.write({
-      records: [
-        {
-          recordType: 'mime',
-          mediaType: CONSTANTS.NFC_MEDIA_TYPE,
-          data: payload,
-        },
-      ],
-    });
+			records: [
+				{
+					recordType: "mime",
+					mediaType: "v/led",
+					data: buffer,
+				},
+			],
+		});
+    console.log('Write completed');
 
     dom.status.textContent = `Write successful. Payload size: ${CONSTANTS.PAYLOAD_SIZE} bytes`;
   } catch (error) {
@@ -542,6 +555,8 @@ async function writeNfcTag() {
     }
   }
 }
+
+
 
 /**
  * Read colors from NTAG215 tag via Web NFC API
