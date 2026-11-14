@@ -509,12 +509,15 @@ function encodePayload() {
  */
 async function writeNfcTag() {
   try {
-    dom.status.textContent = 'Tap NTAG215 to write...';
+    dom.status.textContent = 'Tap NTAG215...';
 
     const payload = encodePayload();
 
     // Create NDEF message with recorded colors
-    const message = {
+    const ndef = new NDEFReader();
+
+    // Write directly using NDEFReader.write()
+    await ndef.write({
       records: [
         {
           recordType: 'mime',
@@ -522,50 +525,20 @@ async function writeNfcTag() {
           data: payload,
         },
       ],
-    };
+    });
 
-    // Use NDEFReader approach (same pattern as working read implementation)
-    const reader = new NDEFReader();
-
-    // Set up handlers FIRST, before scanning
-    reader.onreading = async (event) => {
-      try {
-        // Attempt to write when tag is detected
-        if (typeof reader.write === 'function') {
-          await reader.write(message);
-          dom.status.textContent = `Tag written successfully. ${CONSTANTS.PAYLOAD_SIZE} bytes written.`;
-        } else {
-          dom.status.textContent = 'Write not available on this implementation.';
-        }
-      } catch (writeError) {
-        console.error('Write error:', writeError);
-        dom.status.textContent = `Write failed: ${writeError.message}`;
-      }
-    };
-
-    reader.onerror = (error) => {
-      console.error('Scan error:', error);
-      dom.status.textContent = 'Tag detection cancelled.';
-    };
-
-    // Start scanning
-    await reader.scan();
-
+    dom.status.textContent = `Write successful. Payload size: ${CONSTANTS.PAYLOAD_SIZE} bytes`;
   } catch (error) {
-    console.error('Write error:', error.name, error.message);
+    console.error('Write error:', error);
 
     if (error.name === 'NotSupportedError') {
       dom.status.textContent = 'Web NFC not supported on this browser.';
     } else if (error.name === 'NotAllowedError') {
       dom.status.textContent = 'NFC permission denied. Check device NFC settings.';
     } else if (error.name === 'AbortError') {
-      dom.status.textContent = 'Tag write cancelled or tag out of range.';
-    } else if (error.name === 'InvalidStateError') {
-      dom.status.textContent = 'NFC session error. Try again.';
-    } else if (error.name === 'OperationError') {
-      dom.status.textContent = 'NFC operation failed. Tap tag again.';
+      dom.status.textContent = 'Tag write cancelled.';
     } else {
-      dom.status.textContent = `Write error: ${error.name || 'Unknown'} - ${error.message}`;
+      dom.status.textContent = `Write failed: ${error.message}`;
     }
   }
 }
