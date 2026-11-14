@@ -1,7 +1,7 @@
 const statusEl = document.getElementById("status");
 
 let selectedColor = 0;
-let globalSaturation = 200;
+let globalSaturation = 150;
 
 let BASE_COLORS = [];  // Colors from ambilight + color picker tweaks
 let COLORS = [];       // BASE_COLORS with saturation applied for display
