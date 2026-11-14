@@ -50,6 +50,10 @@ const dom = {
   hslH: null,
   hslS: null,
   hslL: null,
+  hslHValue: null,
+  hslSValue: null,
+  hslLValue: null,
+  rgbValues: null,
   saturationSlider: null,
   saturationValue: null,
   tagContainer: null,
@@ -376,8 +380,14 @@ function updateColorPicker() {
   dom.hslS.value = color.s;
   dom.hslL.value = color.l;
 
+  // Update value displays
+  dom.hslHValue.textContent = Math.round(color.h);
+  dom.hslSValue.textContent = Math.round(color.s);
+  dom.hslLValue.textContent = Math.round(color.l);
+
   const rgb = hslToRgb(color.h, color.s, color.l);
   dom.sample.style.backgroundColor = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+  dom.rgbValues.textContent = `${rgb.r}, ${rgb.g}, ${rgb.b}`;
 
   renderLedGrid(state.ledColors, state.globalSaturation);
 }
@@ -578,8 +588,10 @@ async function readNfcTag() {
  */
 function onHueChange(e) {
   if (state.selectedLedIndex === null) return;
-  state.ledColors[state.selectedLedIndex].h = parseFloat(e.target.value);
-  updateColorPicker();
+  const h = parseFloat(e.target.value);
+  state.ledColors[state.selectedLedIndex].h = h;
+  dom.hslHValue.textContent = Math.round(h);
+  updateColorPickerDisplay();
 }
 
 /**
@@ -587,8 +599,10 @@ function onHueChange(e) {
  */
 function onSaturationChange(e) {
   if (state.selectedLedIndex === null) return;
-  state.ledColors[state.selectedLedIndex].s = parseFloat(e.target.value);
-  updateColorPicker();
+  const s = parseFloat(e.target.value);
+  state.ledColors[state.selectedLedIndex].s = s;
+  dom.hslSValue.textContent = Math.round(s);
+  updateColorPickerDisplay();
 }
 
 /**
@@ -596,8 +610,24 @@ function onSaturationChange(e) {
  */
 function onLightnessChange(e) {
   if (state.selectedLedIndex === null) return;
-  state.ledColors[state.selectedLedIndex].l = parseFloat(e.target.value);
-  updateColorPicker();
+  const l = parseFloat(e.target.value);
+  state.ledColors[state.selectedLedIndex].l = l;
+  dom.hslLValue.textContent = Math.round(l);
+  updateColorPickerDisplay();
+}
+
+/**
+ * Update color picker display (RGB and sample color) without rebuilding entire picker
+ */
+function updateColorPickerDisplay() {
+  if (state.selectedLedIndex === null) return;
+
+  const color = state.ledColors[state.selectedLedIndex];
+  const rgb = hslToRgb(color.h, color.s, color.l);
+  dom.sample.style.backgroundColor = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+  dom.rgbValues.textContent = `${rgb.r}, ${rgb.g}, ${rgb.b}`;
+
+  renderLedGrid(state.ledColors, state.globalSaturation);
 }
 
 /**
@@ -629,6 +659,10 @@ async function initialize() {
   dom.hslH = document.getElementById('hsl-h');
   dom.hslS = document.getElementById('hsl-s');
   dom.hslL = document.getElementById('hsl-l');
+  dom.hslHValue = document.getElementById('hsl-h-value');
+  dom.hslSValue = document.getElementById('hsl-s-value');
+  dom.hslLValue = document.getElementById('hsl-l-value');
+  dom.rgbValues = document.getElementById('rgb-values');
   dom.saturationSlider = document.getElementById('saturation-slider');
   dom.saturationValue = document.getElementById('saturation-value');
   dom.tagContainer = document.getElementById('tagContainer');
