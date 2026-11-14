@@ -101,6 +101,11 @@ a {
     gap: 0;
 }
 
+/* BOTTOM edge displays right-to-left (reversed) */
+#led_grid #bottom {
+    grid-auto-flow: column-reverse;
+}
+
 /* Vertical strips: one column, as many rows as there are children */
 #led_grid #left,
 #led_grid #right {
@@ -108,6 +113,11 @@ a {
     grid-template-columns: 1fr;
     grid-auto-rows: minmax(0, 1fr);      /* every row gets an equal share */
     gap: 0;
+}
+
+/* LEFT edge displays bottom-to-top (reversed) */
+#led_grid #left {
+    grid-auto-flow: row-reverse;
 }
 
 #led_grid #top    { grid-area: top; }

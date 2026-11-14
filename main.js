@@ -185,6 +185,7 @@ function averageRegionRgb(imageData, startX, startY, width, height, imgWidth) {
 
 /**
  * Analyze image edges to extract LED colors
+ * Extracts 8px depth bands from each edge, focusing on 2px narrow detection band
  * @param {HTMLCanvasElement} canvas - Processed image canvas
  * @returns {Array} Array of 44 HSL color objects
  */
@@ -196,80 +197,79 @@ function analyzeAmbilight(canvas) {
 
   const ledColors = [];
 
-  // BOTTOM: 11 LEDs, right-to-left (reversed)
-  for (let i = 0; i < CONSTANTS.LEDS_PER_SIDE; i++) {
-    const x = size - 1 - Math.floor((i / CONSTANTS.LEDS_PER_SIDE) * size);
-    const rgb = averageRegionRgb(
-      data,
-      Math.max(0, x - CONSTANTS.EDGE_DEPTH / 2),
-      size - CONSTANTS.MIN_EDGE,
-      CONSTANTS.EDGE_DEPTH / 2,
-      CONSTANTS.MIN_EDGE,
-      size
-    );
+  // Helper function to sample a single LED from an edge
+  // Each LED gets an equal horizontal/vertical slice of the edge
+  function sampleLedFromEdge(ledIndex, edge) {
+    const ledWidth = size / CONSTANTS.LEDS_PER_SIDE;
+    let rgb;
+
+    if (edge === 'bottom') {
+      // Bottom edge: right-to-left (reversed), y near size-1
+      const x = (CONSTANTS.LEDS_PER_SIDE - 1 - ledIndex) * ledWidth;
+      rgb = averageRegionRgb(
+        data,
+        Math.floor(x),
+        size - CONSTANTS.MIN_EDGE,
+        Math.ceil(ledWidth),
+        CONSTANTS.MIN_EDGE,
+        size
+      );
+    } else if (edge === 'left') {
+      // Left edge: bottom-to-top (reversed), x = 0
+      const y = (CONSTANTS.LEDS_PER_SIDE - 1 - ledIndex) * ledWidth;
+      rgb = averageRegionRgb(
+        data,
+        0,
+        Math.floor(y),
+        CONSTANTS.MIN_EDGE,
+        Math.ceil(ledWidth),
+        size
+      );
+    } else if (edge === 'top') {
+      // Top edge: left-to-right (normal), y = 0
+      const x = ledIndex * ledWidth;
+      rgb = averageRegionRgb(
+        data,
+        Math.floor(x),
+        0,
+        Math.ceil(ledWidth),
+        CONSTANTS.MIN_EDGE,
+        size
+      );
+    } else if (edge === 'right') {
+      // Right edge: top-to-bottom (normal), x near size-1
+      const y = ledIndex * ledWidth;
+      rgb = averageRegionRgb(
+        data,
+        size - CONSTANTS.MIN_EDGE,
+        Math.floor(y),
+        CONSTANTS.MIN_EDGE,
+        Math.ceil(ledWidth),
+        size
+      );
+    }
+
+    // Apply gamma removal for display-accurate colors
     const gammaRemoved = {
       r: applyGammaRemoval(rgb.r),
       g: applyGammaRemoval(rgb.g),
       b: applyGammaRemoval(rgb.b),
     };
-    ledColors.push(rgbToHsl(gammaRemoved.r, gammaRemoved.g, gammaRemoved.b));
+    return rgbToHsl(gammaRemoved.r, gammaRemoved.g, gammaRemoved.b);
   }
 
-  // LEFT: 11 LEDs, bottom-to-top (reversed)
+  // Sample all edges in order: BOTTOM, LEFT, TOP, RIGHT
   for (let i = 0; i < CONSTANTS.LEDS_PER_SIDE; i++) {
-    const y = size - 1 - Math.floor((i / CONSTANTS.LEDS_PER_SIDE) * size);
-    const rgb = averageRegionRgb(
-      data,
-      0,
-      Math.max(0, y - CONSTANTS.EDGE_DEPTH / 2),
-      CONSTANTS.MIN_EDGE,
-      CONSTANTS.EDGE_DEPTH / 2,
-      size
-    );
-    const gammaRemoved = {
-      r: applyGammaRemoval(rgb.r),
-      g: applyGammaRemoval(rgb.g),
-      b: applyGammaRemoval(rgb.b),
-    };
-    ledColors.push(rgbToHsl(gammaRemoved.r, gammaRemoved.g, gammaRemoved.b));
+    ledColors.push(sampleLedFromEdge(i, 'bottom'));
   }
-
-  // TOP: 11 LEDs, left-to-right (normal order)
   for (let i = 0; i < CONSTANTS.LEDS_PER_SIDE; i++) {
-    const x = Math.floor((i / CONSTANTS.LEDS_PER_SIDE) * size);
-    const rgb = averageRegionRgb(
-      data,
-      x,
-      0,
-      CONSTANTS.EDGE_DEPTH / 2,
-      CONSTANTS.MIN_EDGE,
-      size
-    );
-    const gammaRemoved = {
-      r: applyGammaRemoval(rgb.r),
-      g: applyGammaRemoval(rgb.g),
-      b: applyGammaRemoval(rgb.b),
-    };
-    ledColors.push(rgbToHsl(gammaRemoved.r, gammaRemoved.g, gammaRemoved.b));
+    ledColors.push(sampleLedFromEdge(i, 'left'));
   }
-
-  // RIGHT: 11 LEDs, top-to-bottom (normal order)
   for (let i = 0; i < CONSTANTS.LEDS_PER_SIDE; i++) {
-    const y = Math.floor((i / CONSTANTS.LEDS_PER_SIDE) * size);
-    const rgb = averageRegionRgb(
-      data,
-      size - CONSTANTS.MIN_EDGE,
-      y,
-      CONSTANTS.MIN_EDGE,
-      CONSTANTS.EDGE_DEPTH / 2,
-      size
-    );
-    const gammaRemoved = {
-      r: applyGammaRemoval(rgb.r),
-      g: applyGammaRemoval(rgb.g),
-      b: applyGammaRemoval(rgb.b),
-    };
-    ledColors.push(rgbToHsl(gammaRemoved.r, gammaRemoved.g, gammaRemoved.b));
+    ledColors.push(sampleLedFromEdge(i, 'top'));
+  }
+  for (let i = 0; i < CONSTANTS.LEDS_PER_SIDE; i++) {
+    ledColors.push(sampleLedFromEdge(i, 'right'));
   }
 
   return ledColors;
