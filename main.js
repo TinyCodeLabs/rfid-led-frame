@@ -515,30 +515,23 @@ async function writeNfcTag() {
 		return;
 	}
 
-    dom.status.textContent = 'Tap NTAG215...';
-
+    dom.status.textContent = 'Encoding payload...';
     const payload = encodePayload();
-    console.log('Payload size:', payload.length);
+    dom.status.textContent = `Payload encoded: ${payload.length} bytes`;
 
-    // Create NDEF message with recorded colors
+    dom.status.textContent = 'Preparing write...';
     const ndef = new NDEFReader();
 
-    // Convert Uint8Array to ArrayBuffer for compatibility
-    const buffer = payload.buffer.slice(payload.byteOffset, payload.byteOffset + payload.byteLength);
-    console.log('Buffer size:', buffer.byteLength);
-
-    // Write directly using NDEFReader.write()
-    console.log('Attempting write...');
+    dom.status.textContent = 'Tap NTAG215 now...';
     await ndef.write({
 			records: [
 				{
 					recordType: "mime",
 					mediaType: "v/led",
-					data: buffer,
+					data: payload,
 				},
 			],
 		});
-    console.log('Write completed');
 
     dom.status.textContent = `Write successful. Payload size: ${CONSTANTS.PAYLOAD_SIZE} bytes`;
   } catch (error) {
