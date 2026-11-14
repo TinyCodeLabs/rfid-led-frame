@@ -466,6 +466,7 @@ function captureFrame() {
   dom.video.style.display = 'none';
   dom.canvas.style.display = 'block';
   dom.captureContainer.style.display = 'none';
+  document.getElementById('recaptureContainer').style.display = 'block';
   dom.pickerContainer.style.display = 'block';
   dom.tagContainer.style.display = 'block';
   dom.noPicker.style.display = 'block';
@@ -622,6 +623,20 @@ function deselectLed() {
   renderLedGrid(state.ledColors, state.globalSaturation);
 }
 
+/**
+ * Return to live camera capture mode
+ */
+function returnToCapture() {
+  state.selectedLedIndex = null;
+  dom.video.style.display = 'block';
+  dom.canvas.style.display = 'none';
+  dom.captureContainer.style.display = 'block';
+  document.getElementById('recaptureContainer').style.display = 'none';
+  dom.pickerContainer.style.display = 'none';
+  dom.tagContainer.style.display = 'none';
+  dom.status.textContent = 'Ready.';
+}
+
 // ============================================================================
 // EVENT HANDLERS
 // ============================================================================
@@ -723,6 +738,7 @@ async function initialize() {
 
   const resetLedBtn = document.getElementById('resetLedBtn');
   const deselectBtn = document.getElementById('deselectBtn');
+  const recaptureBtn = document.getElementById('recapture');
 
   // Set up event listeners
   dom.snap.addEventListener('click', captureFrame);
@@ -734,6 +750,7 @@ async function initialize() {
   dom.writeBtn.addEventListener('click', writeNfcTag);
   resetLedBtn.addEventListener('click', resetLedToCapture);
   deselectBtn.addEventListener('click', deselectLed);
+  recaptureBtn.addEventListener('click', returnToCapture);
 
   // Initialize camera
   await initializeCamera();
