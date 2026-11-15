@@ -504,60 +504,80 @@ function encodePayload() {
   return payload;
 }
 
+let activeCtrl = null;
+const NTAG215_NDEF_AREA = 496;
+
+function ndefTlvSize(payloadLen, type = "v/led") {
+  const typeLen = new TextEncoder().encode(type).length;
+  const record = 1 + 1 + (payloadLen < 256 ? 1 : 4) + typeLen + payloadLen;
+  return record + (record < 255 ? 2 : 4) + 1; // TLV-Header + Terminator
+}
+
 /**
  * Write colors to NTAG215 tag via Web NFC API
  */
 async function writeNfcTag() {
+  if (!("NDEFReader" in window)) {
+    logNdefState("Web NFC not supported.");
+    return;
+  }
+
+  // Vorherigen, evtl. noch offenen Vorgang sauber beenden
+  activeCtrl?.abort();
+  const ctrl = new AbortController();
+  activeCtrl = ctrl;
+  let timedOut = false;
+  const timer = setTimeout(() => { timedOut = true; ctrl.abort(); }, 30000);
+
   try {
-
-    if (!("NDEFReader" in window)) {
-		dom.status.textContent = "Web NFC not supported.";
-		return;
-	}
-
-    dom.status.textContent = 'Encoding payload...';
     const payload = encodePayload();
-    dom.status.textContent = `Payload encoded: ${payload.length} bytes`;
 
-    dom.status.textContent = 'Preparing write...';
+    const total = ndefTlvSize(payload.byteLength);
+    if (total > NTAG215_NDEF_AREA) {
+      logNdefState(
+        `Payload zu groß: ${total} / ${NTAG215_NDEF_AREA} Byte inkl. NDEF-Overhead`);
+      return;
+    }
+
     const ndef = new NDEFReader();
 
-    dom.status.textContent = 'Tap NTAG215 now...';
+    // Nur zur Diagnose: Sieht Chrome den Tag überhaupt?
+    ndef.onreading = (e) => logNdefState("Tag erkannt: " + e.serialNumber);
+    ndef.onreadingerror = () => logNdefState("Tag erkannt, aber nicht NDEF-lesbar");
+    await ndef.scan({ signal: ctrl.signal });
 
-    // Create write promise with timeout
-    const writePromise = ndef.write({
-			records: [
-				{
-					recordType: "mime",
-					mediaType: "v/led",
-					data: payload,
-				},
-			],
-		});
+    logNdefState("Tag an die NFC-Stelle halten und ~2 s still halten…");
 
-    // Add 30 second timeout
-    const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('Write timeout - tag not detected')), 30000)
+    await ndef.write(
+      { records: [{ recordType: "mime", mediaType: "v/led", data: payload }] },
+      { signal: ctrl.signal, overwrite: true }
     );
 
-    await Promise.race([writePromise, timeoutPromise]);
-
-    dom.status.textContent = `Write successful. Payload size: ${CONSTANTS.PAYLOAD_SIZE} bytes`;
+    logNdefState(`Write successful. ${payload.byteLength} Byte Payload, ${total} Byte auf dem Tag`);
   } catch (error) {
-    console.error('Write error:', error);
-
-    if (error.name === 'NotSupportedError') {
-      dom.status.textContent = 'Web NFC not supported on this browser.';
-    } else if (error.name === 'NotAllowedError') {
-      dom.status.textContent = 'NFC permission denied. Check device NFC settings.';
-    } else if (error.name === 'AbortError') {
-      dom.status.textContent = 'Tag write cancelled.';
+    console.error("Write error:", error);
+    if (error.name === "AbortError") {
+      logNdefState(timedOut
+        ? "Timeout – Tag nicht (stabil) erkannt. Position wechseln, still halten."
+        : "Tag write cancelled.");
+    } else if (error.name === "NotAllowedError") {
+      logNdefState("NFC permission denied. Check device NFC settings.");
+    } else if (error.name === "NotSupportedError") {
+      logNdefState("Web NFC not supported on this browser.");
     } else {
-      dom.status.textContent = `Write failed: ${error.message}`;
+      logNdefState(`Write failed: ${error.name}: ${error.message}`);
     }
+  } finally {
+    clearTimeout(timer);
+    ctrl.abort(); // beendet auch den Scan
+    if (activeCtrl === ctrl) activeCtrl = null;
   }
 }
 
+
+function logNdefState(message) {
+  dom.status.innerHTML += message + "<br>";
+}
 
 
 /**
