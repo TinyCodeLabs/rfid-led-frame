@@ -532,6 +532,8 @@ async function writeNfcTag() {
   try {
     const payload = encodePayload();
 
+    nfcDiag();
+
     const total = ndefTlvSize(payload.byteLength);
     if (total > NTAG215_NDEF_AREA) {
       logNdefState(
@@ -577,6 +579,23 @@ async function writeNfcTag() {
 
 function logNdefState(message) {
   dom.status.innerHTML += message + "<br>";
+}
+
+async function nfcDiag() {
+  const log = logNdefState;
+  log("UA: " + navigator.userAgent);
+  log("perm: " + (await navigator.permissions.query({ name: "nfc" })).state);
+  addEventListener("blur", () => log("window blur"));
+  addEventListener("focus", () => log("window focus"));
+  document.addEventListener("visibilitychange", () =>
+    log("visibility: " + document.visibilityState));
+
+  const ndef = new NDEFReader();
+  ndef.onreading = (e) =>
+    log(`reading: ${e.serialNumber}, records=${e.message.records.length}`);
+  ndef.onreadingerror = () => log("readingerror");
+  await ndef.scan();
+  log(`scan aktiv, hasFocus=${document.hasFocus()}, Tag jetzt antippen`);
 }
 
 
