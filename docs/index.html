@@ -9,6 +9,9 @@
 	</head>
 	<body>
 		<div class="column">
+			<div class="container">
+				<a class="button-link" href="app/app.apk" download="app.apk">Download Android App</a>
+			</div>
 			<h2>NTAG215 Backlight programmer</h2>
 
 			<div class="container">
@@ -29,7 +32,11 @@
 				</div>
 			</div>
 			<div class="container" id="captureContainer">
-				<button id="snap">Capture</button>
+				<div style="display: flex; gap: 10px">
+					<button id="snap">Capture</button>
+					<button id="uploadBtn">Upload Photo</button>
+				</div>
+				<input type="file" id="fileInput" accept="image/*" style="display: none" />
 			</div>
 			<div class="container" id="recaptureContainer" style="display: none">
 				<button id="recapture">Capture New Image</button>

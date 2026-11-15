@@ -196,3 +196,26 @@ label {
 	margin-bottom: 10px;
 	font-weight: 300;
 }
+
+.button-link {
+	display: block;
+	box-sizing: border-box;
+	background-color: #1b1b29;
+	color: white;
+	border: 1px solid white;
+	padding: 10px;
+	width: 100%;
+	transition: 250ms;
+	font-family: "Source Code Pro", monospace;
+	font-size: large;
+	font-weight: 200;
+	border-radius: 5px;
+	text-decoration: none;
+	cursor: pointer;
+}
+
+.button-link:active,
+.button-link:hover {
+	background-color: white;
+	color: black;
+}

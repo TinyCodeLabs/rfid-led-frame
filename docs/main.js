@@ -429,16 +429,60 @@ async function initializeCamera() {
  * Capture video frame to canvas and perform ambilight analysis
  */
 function captureFrame() {
+  processImageSource(dom.video, dom.video.videoWidth, dom.video.videoHeight);
+}
+
+/**
+ * Open the file picker to choose a photo from the library
+ */
+function openFilePicker() {
+  dom.fileInput.value = '';
+  dom.fileInput.click();
+}
+
+/**
+ * Load the selected photo and run it through the same pipeline as a capture
+ * @param {Event} event - change event from the file input
+ */
+function onFileSelected(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+
+  const url = URL.createObjectURL(file);
+  const img = new Image();
+  img.onload = () => {
+    processImageSource(img, img.naturalWidth, img.naturalHeight);
+    URL.revokeObjectURL(url);
+  };
+  img.onerror = () => {
+    dom.status.textContent = 'Could not load the selected image.';
+    URL.revokeObjectURL(url);
+  };
+  img.src = url;
+}
+
+/**
+ * Draw a center-cropped square of the source to the canvas and analyze it
+ * @param {CanvasImageSource} source - video element or image
+ * @param {number} width - source width in pixels
+ * @param {number} height - source height in pixels
+ */
+function processImageSource(source, width, height) {
+  if (!width || !height) {
+    dom.status.textContent = 'No image available to process.';
+    return;
+  }
+
   const ctx = dom.canvas.getContext('2d');
 
   // Determine crop size (use smallest dimension)
-  const size = Math.min(dom.video.videoWidth, dom.video.videoHeight);
-  const startX = (dom.video.videoWidth - size) / 2;
-  const startY = (dom.video.videoHeight - size) / 2;
+  const size = Math.min(width, height);
+  const startX = (width - size) / 2;
+  const startY = (height - size) / 2;
 
   // Draw center-cropped square to canvas at 400x400 resolution
   ctx.drawImage(
-    dom.video,
+    source,
     startX,
     startY,
     size,
@@ -805,6 +849,8 @@ async function initialize() {
   dom.video = document.getElementById('video');
   dom.canvas = document.getElementById('canvas');
   dom.snap = document.getElementById('snap');
+  dom.uploadBtn = document.getElementById('uploadBtn');
+  dom.fileInput = document.getElementById('fileInput');
   dom.captureContainer = document.getElementById('captureContainer');
   dom.pickerContainer = document.getElementById('pickerContainer');
   dom.noPicker = document.getElementById('noPicker');
@@ -838,6 +884,8 @@ async function initialize() {
 
   // Set up event listeners
   dom.snap.addEventListener('click', captureFrame);
+  dom.uploadBtn.addEventListener('click', openFilePicker);
+  dom.fileInput.addEventListener('change', onFileSelected);
   dom.hslH.addEventListener('input', onHueChange);
   dom.hslS.addEventListener('input', onSaturationChange);
   dom.hslL.addEventListener('input', onLightnessChange);
